@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+  <Resource name="jdbc/checkin" auth="Container" type="javax.sql.DataSource"
+               maxActive="50" maxIdle="30" maxWait="10000"
+               username="xx" password="xx" 
+               driverClassName="com.mysql.jdbc.Driver"
+               factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+               url="jdbc:mysql://localhost:3306/checkin"/>
+</Context>
