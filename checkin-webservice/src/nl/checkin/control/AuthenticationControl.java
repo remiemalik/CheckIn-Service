@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 
 import nl.checkin.connector.DataSourceSingleton;
+import nl.checkin.model.Token;
 import nl.checkin.util.Utils;
 
 
@@ -23,8 +24,8 @@ public class AuthenticationControl {
 	}
 	
 	@SuppressWarnings("unused")
-	public boolean hasValidCredentials(String username, String password) throws SQLException, NamingException{
-		String query = "select count(*) as count from user where username=? AND password=(?)";
+	public Token hasValidCredentials(String username, String password) throws SQLException, NamingException{
+		String query = "select count(*) as count, token from user where username=? AND password=(?)";
 		PreparedStatement preparedStatement = con.prepareStatement(query);
 		preparedStatement.setString(1, username);
 		preparedStatement.setString(2, password);

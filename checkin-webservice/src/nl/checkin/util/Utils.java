@@ -3,10 +3,11 @@ package nl.checkin.util;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import nl.checkin.model.Token;
+
 public class Utils {
 	
-	private static int count;
-	private static boolean recordExist;
+
 	
 	public Utils(){
 		
@@ -20,20 +21,28 @@ public class Utils {
 		}
 	}
 	
-	public static boolean recordExists(ResultSet result) throws SQLException {
+	public static Token recordExists(ResultSet result) throws SQLException {
+		Token token = null;
+		int count;
+		boolean recordExist = false;
+		
 		while (result.next()) {
+	
 			count = result.getInt("count");
-		}
-		switch (count) {
-		case 0:
-			recordExist = false;
-			break;
+			switch (count) {
+			case 0:
+				recordExist = false;
+				break;
 
-		case 1:
-			recordExist = true;
-			break;
+			case 1:
+				recordExist = true;
+				break;
+			}
+			
+			token = new Token(result.getString("token"), recordExist);
 		}
-		return recordExist;
+		
+		return token;
 	}
 	
 	
