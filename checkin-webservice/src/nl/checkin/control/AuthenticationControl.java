@@ -30,7 +30,16 @@ public class AuthenticationControl {
 		preparedStatement.setString(1, username);
 		preparedStatement.setString(2, password);
 		resultSet = preparedStatement.executeQuery();
-		return Utils.recordExists(resultSet);
+		return Utils.recordExists(resultSet, true);
+	}
+	
+	@SuppressWarnings("unused")
+	public Token hasValidToken(String token) throws SQLException, NamingException{
+		String query = "select count(*) as count from user where token=?";
+		PreparedStatement preparedStatement = con.prepareStatement(query);
+		preparedStatement.setString(1, token);
+		resultSet = preparedStatement.executeQuery();
+		return Utils.recordExists(resultSet, false);
 	}
 	
 
