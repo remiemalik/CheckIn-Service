@@ -18,14 +18,12 @@ import nl.checkin.util.Utils;
 public class RegistrationControl {
 	
 	private ResultSet resultSet;
-	private Connection con;
 	private AuthenticationControl authControl;
 	private Token authToken;
 	private User user;
 	private Object response;
 
 	public RegistrationControl() throws SQLException, NamingException {
-		 con = DataSourceSingleton.getInstance().getDatasource().getConnection();
 		 authControl = new AuthenticationControl();
 	}
 	
@@ -35,10 +33,13 @@ public class RegistrationControl {
 		authToken = authControl.hasValidToken(inputToken);
 
 		if (authToken.isValid()) {
+			Connection con = DataSourceSingleton.getInstance().getDatasource().getConnection();
 			String query = "select count(*) as count from registration where fk_user_id = ? and DATE(checkindate) = DATE(NOW())";
 			PreparedStatement preparedStatement = con.prepareStatement(query);
 			preparedStatement.setInt(1, user_id);
 			resultSet = preparedStatement.executeQuery();
+			con.close();
+			
 			Token registerToken = Utils.recordExists(resultSet, false);
 			user = new User(user_id);
 
@@ -54,12 +55,13 @@ public class RegistrationControl {
 
 	}
 	
-	public void checkIn(User user) throws SQLException {
+	public void checkIn(User user) throws SQLException, NamingException {
 		
 		Registration registration = new Registration();
 		registration.setCheckInDate();
 		registration.setDayName();
 		
+		Connection con = DataSourceSingleton.getInstance().getDatasource().getConnection();
 		String query = "insert into registration (fk_user_id, checkindate, dayname) values (?, ?, ?)";
 		PreparedStatement preparedStatement = con.prepareStatement(query);
 		preparedStatement.setInt(1, user.getId());
@@ -68,14 +70,17 @@ public class RegistrationControl {
 
 		if(preparedStatement.executeUpdate() > 0){
 			response = registration;
+			con.close();
 		} else {
 			response = new Response("204","Could not perform action");
+			con.close();
 		}
 	}
 
-	public void checkOut(User user) throws SQLException, ParseException {
+	public void checkOut(User user) throws SQLException, ParseException, NamingException {
 		
 		Registration registration = null;
+		Connection con = DataSourceSingleton.getInstance().getDatasource().getConnection();
 	 	String query = "select id, checkindate from registration where fk_user_id = ? and DATE(checkindate) = DATE(NOW())";
 		PreparedStatement preparedStatement = con.prepareStatement(query);
 		preparedStatement.setInt(1, user.getId());
@@ -98,8 +103,10 @@ public class RegistrationControl {
 		
 		if(preparedStatement.executeUpdate() > 0){
 			response = registration;
+			con.close();
 		} else {
 			response = new Response("204","Could not perform action");
+			con.close();
 		}
 	}
 	
