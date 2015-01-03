@@ -1,9 +1,5 @@
 package nl.checkin.model;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -11,95 +7,96 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Registration {
 
 	private int id;
-	private Calendar checkInDate;
-	private Calendar checkOutDate;
-    private String checkOutDateString;
+	private int fk_user_id;
+	private long temporaryDate;
+	private long checkInDate;
+	private long checkOutDate;
 	private int dayName;
-	private long minutes;
-	DateFormat dateFormat;
-    Calendar calendar;
-
+	private int week;
+	private int year;
+	private int minutes;
 	
 	public Registration() {
-		dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		calendar = Calendar.getInstance();
+
 	}
-	
 
 	public int getId() {
 		return id;
 	}
 
-
-
 	public void setId(int id) {
 		this.id = id;
 	}
 
-
-	public void setCheckInDate() {
-		this.checkInDate = calendar;
-	}
-	
-	public void setCheckInDate(String calendarString) throws ParseException{
-		this.checkInDate = calendar;
-		this.checkInDate.setTime(dateFormat.parse(calendarString));
+	public int getFk_user_id() {
+		return fk_user_id;
 	}
 
-	public String getCheckInDate() {
-		return dateFormat.format(this.checkInDate.getTime());
+	public void setFk_user_id(int fk_user_id) {
+		this.fk_user_id = fk_user_id;
 	}
 	
-	public Calendar getCheckInDateInstance(){
+	
+
+	public long getTemporaryDate() {
+		return temporaryDate;
+	}
+
+	public void setTemporaryDate(long temporaryDate) {
+		this.temporaryDate = temporaryDate;
+	}
+
+	public long getCheckInDate() {
 		return checkInDate;
 	}
 
-	public void setCheckOutDate() {
-		setCalendar();
-		this.checkOutDate = calendar;
-		setCheckOutDateString(dateFormat.format(this.checkOutDate.getTime()));
-	}
-	
-
-	public String getCheckOutDateString() {
-		return checkOutDateString;
+	public void setCheckInDate(long checkInDate) {
+		this.checkInDate = checkInDate;
 	}
 
-
-	public void setCheckOutDateString(String checkOutDateString) {
-		this.checkOutDateString = checkOutDateString;
-	}
-
-
-	public void setCalendar() {
-		this.calendar =  Calendar.getInstance();;
-	}
-
-
-	public String getCheckOutDate() {
-		return dateFormat.format(this.checkOutDate.getTime());
-	}
-	
-	public Calendar getCheckOutDateInstance(){
+	public long getCheckOutDate() {
 		return checkOutDate;
 	}
 
-	
+	public void setCheckOutDate(long checkOutDate) {
+		this.checkOutDate = checkOutDate;
+	}
+
 	public int getDayName() {
 		return dayName;
 	}
 
-	public void setDayName() {
-		this.dayName = calendar.DAY_OF_WEEK;
+	public void setDayName(int dayName) {
+		this.dayName = dayName;
 	}
 
-	public long getMinutes() {
+	public int getWeek() {
+		return week;
+	}
+
+	public void setWeek(int week) {
+		this.week = week;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public int getMinutes() {
 		return minutes;
 	}
 
-	public void setMinutes(long minutes) {
+	public void setMinutes(int minutes) {
 		this.minutes = minutes;
 	}
+	
+	
+	
+
 	
 	
 }

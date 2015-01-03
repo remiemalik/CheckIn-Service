@@ -16,6 +16,10 @@ public class Token {
 	public Token(){
 		
 	}
+	
+	public String toString(){
+		return "token is: " + token  + " and is valid: " + isValid;
+	}
 
 	public String getToken() {
 		return token;

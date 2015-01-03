@@ -16,37 +16,38 @@ import nl.checkin.util.Utils;
 public class AuthenticationControl {
 
 	private ResultSet resultSet;
-
+	private Connection connection;
+	private PreparedStatement statement;
 
 	public AuthenticationControl() throws SQLException, NamingException {
-		// TODO Auto-generated constructor stub
+	}
+	
+	public Token hasValidCredentials(String username, String password) throws SQLException, NamingException{
+		try {
+			connection = DataSourceSingleton.getInstance().getDatasource().getConnection();
+			String query = "select count(*) as count, token from user where username=? AND password=(?)";
+			statement = connection.prepareStatement(query);
+			statement.setString(1, username);
+			statement.setString(2, password);
+			resultSet = statement.executeQuery();
+			return Utils.recordExists(resultSet, true);
+		} finally {
+			Utils.closeEverything(resultSet, statement, connection);
+		}
+
+	}
+	
+	public Token hasValidToken(String token) throws SQLException, NamingException{
+		try {
+		    connection = DataSourceSingleton.getInstance().getDatasource().getConnection();
+			String query = "select count(*) as count from user where token=?";
+			statement = connection.prepareStatement(query);
+			statement.setString(1, token);
+			resultSet = statement.executeQuery();
+			return Utils.recordExists(resultSet, false);
+		} finally {
+			Utils.closeEverything(resultSet, statement, connection);
+		}
 		
 	}
-	
-	@SuppressWarnings("unused")
-	public Token hasValidCredentials(String username, String password) throws SQLException, NamingException{
-		Connection con = DataSourceSingleton.getInstance().getDatasource().getConnection();
-		String query = "select count(*) as count, token from user where username=? AND password=(?)";
-		PreparedStatement preparedStatement = con.prepareStatement(query);
-		preparedStatement.setString(1, username);
-		preparedStatement.setString(2, password);
-		resultSet = preparedStatement.executeQuery();
-		con.close();
-		return Utils.recordExists(resultSet, true);
-	}
-	
-	@SuppressWarnings("unused")
-	public Token hasValidToken(String token) throws SQLException, NamingException{
-		Connection con = DataSourceSingleton.getInstance().getDatasource().getConnection();
-		String query = "select count(*) as count from user where token=?";
-		PreparedStatement preparedStatement = con.prepareStatement(query);
-		preparedStatement.setString(1, token);
-		resultSet = preparedStatement.executeQuery();
-		con.close();
-		return Utils.recordExists(resultSet, false);
-	}
-	
-
-	
-
 }

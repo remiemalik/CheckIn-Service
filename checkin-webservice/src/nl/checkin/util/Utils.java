@@ -1,7 +1,9 @@
 package nl.checkin.util;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
 
 import nl.checkin.model.Response;
@@ -52,20 +54,18 @@ public class Utils {
 		return token;
 	}
 	
-	public static long getDifferenceInMinutes(Calendar startTime, Calendar endTime){
+	public static int getDifferenceInMinutes(long startTime, long endTime){
 		
-		long start = startTime.getTimeInMillis();
-		long end = endTime.getTimeInMillis();
 		long timeDifInMilliSec = 0;
-		if(start >=  end){
-			timeDifInMilliSec = start - end;
+		if(startTime >=  endTime){
+			timeDifInMilliSec = startTime - endTime;
 		} else{ 
-			timeDifInMilliSec = end - start;
+			timeDifInMilliSec = endTime - startTime;
 		}
 		
 		 long timeDifMinutes = timeDifInMilliSec / (60 * 1000);
 		
-		return timeDifMinutes;
+		return (int) timeDifMinutes;
 	}
 	
 	public static Response getResponse(int number){
@@ -77,6 +77,30 @@ public class Utils {
 		}
 		return response;
 	}
+	
+	public static void closeEverything(ResultSet rs, Statement stmt,
+			Connection con) {
+		if (rs != null) {
+			try {
+				rs.close();
+			} catch (SQLException e) {
+			}
+		}
+		if (stmt != null) {
+			try {
+				stmt.close();
+			} catch (SQLException e) {
+			}
+		}
+		if (con != null) {
+			try {
+				con.close();
+			} catch (SQLException e) {
+			}
+		}
+	}
+
+
 	
 	
 	
