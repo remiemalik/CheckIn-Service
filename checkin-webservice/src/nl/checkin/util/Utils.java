@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Calendar;
 
 import nl.checkin.model.Response;
 import nl.checkin.model.Token;
@@ -57,14 +56,16 @@ public class Utils {
 	public static int getDifferenceInMinutes(long startTime, long endTime){
 		
 		long timeDifInMilliSec = 0;
+		System.out.println(startTime);
+		System.out.println(endTime);
 		if(startTime >=  endTime){
 			timeDifInMilliSec = startTime - endTime;
 		} else{ 
 			timeDifInMilliSec = endTime - startTime;
 		}
 		
-		 long timeDifMinutes = timeDifInMilliSec / (60 * 1000);
-		
+		 long timeDifMinutes = (timeDifInMilliSec * 1000L) / (60 * 1000);
+		System.out.println(" result: " +timeDifMinutes);
 		return (int) timeDifMinutes;
 	}
 	
