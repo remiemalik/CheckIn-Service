@@ -1,35 +1,29 @@
 package nl.checkin.control;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 
 import javax.naming.NamingException;
-import nl.checkin.connector.DataSourceSingleton;
+
+import nl.checkin.control.connection.DataSourceSingleton;
+import nl.checkin.model.ErrorResponse;
 import nl.checkin.model.Registration;
 import nl.checkin.model.Response;
+import nl.checkin.model.SuccesResponse;
 import nl.checkin.model.Token;
 import nl.checkin.util.Utils;
 
-public class RegistrationControl {
+public class RegistrationControl extends Control {
 
-	private ResultSet resultSet;
 	private AuthenticationControl authControl;
 	private Token authToken;
-	private Object response;
-
-	private Connection connection;
-	private PreparedStatement statement;
 
 	public RegistrationControl() throws SQLException, NamingException {
 		authControl = new AuthenticationControl();
 	}
 
-	public void register(int user_id, String inputToken,
-			Registration registration) throws SQLException, NamingException,
-			ParseException {
+	public Response register(String inputToken, Registration registration)
+			throws SQLException, NamingException, ParseException {
 
 		authToken = authControl.hasValidToken(inputToken);
 
@@ -41,32 +35,31 @@ public class RegistrationControl {
 						.getConnection();
 				String query = "select count(*) as count from registration where fk_user_id = ? and DATE_FORMAT(FROM_UNIXTIME(checkInDate),"
 						+ "    '%Y-%m-%d') = DATE(NOW())"
-						+      " AND checkOutDate IS NULL";
+						+ " AND checkOutDate IS NULL";
 				statement = connection.prepareStatement(query);
-				statement.setInt(1, user_id);
+				statement.setInt(1, registration.getFk_user_id());
 				resultSet = statement.executeQuery();
 
 				Token registerToken = Utils.recordExists(resultSet, false);
 
 				if (registerToken.isValid()) {
-					checkOut(registration);
 					System.out.println(" check out");
+					return checkOut(registration);
 				} else {
-					checkIn(registration);
 					System.out.println(" check in");
+					return checkIn(registration);
 				}
 
 			} finally {
 				Utils.closeEverything(resultSet, statement, connection);
 			}
-
 		} else {
-			response = new Response("300", "bad content");
+			return new ErrorResponse("300", "bad content");
 		}
 
 	}
 
-	public void checkIn(Registration registration) throws SQLException,
+	public Response checkIn(Registration registration) throws SQLException,
 			NamingException {
 
 		try {
@@ -81,9 +74,9 @@ public class RegistrationControl {
 			statement.setInt(5, registration.getYear());
 
 			if (statement.executeUpdate() > 0) {
-				response = registration;
+				return new SuccesResponse(registration);
 			} else {
-				response = new Response("204", "Could not perform action");
+				return new ErrorResponse("204", "Could not perform action");
 
 			}
 		} finally {
@@ -91,7 +84,7 @@ public class RegistrationControl {
 		}
 	}
 
-	public void checkOut(Registration registration) throws SQLException,
+	public Response checkOut(Registration registration) throws SQLException,
 			ParseException, NamingException {
 
 		try {
@@ -109,8 +102,8 @@ public class RegistrationControl {
 				registration.setCheckInDate(resultSet.getLong("checkindate"));
 				registration.setCheckOutDate(registration.getTemporaryDate());
 				registration.setMinutes(Utils.getDifferenceInMinutes(
-				registration.getCheckInDate(),
-				registration.getCheckOutDate()));
+						registration.getCheckInDate(),
+						registration.getCheckOutDate()));
 			}
 
 			query = "update registration set checkoutdate=?, minutes=? where id=? ";
@@ -122,19 +115,16 @@ public class RegistrationControl {
 			statement.setInt(3, registration.getId());
 
 			if (statement.executeUpdate() > 0) {
-				response = registration;
+
+				return new SuccesResponse(registration);
 			} else {
-				response = new Response("204", "Could not perform action");
+				return new ErrorResponse("204", "Could not perform action");
 			}
 
 		} finally {
 			Utils.closeEverything(resultSet, statement, connection);
 		}
 
-	}
-
-	public Object getResponse() {
-		return response;
 	}
 
 }

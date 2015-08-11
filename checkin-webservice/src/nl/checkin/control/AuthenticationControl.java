@@ -7,17 +7,14 @@ import java.sql.SQLException;
 
 import javax.naming.NamingException;
 
-import nl.checkin.connector.DataSourceSingleton;
+import nl.checkin.control.connection.DataSourceSingleton;
 import nl.checkin.model.Token;
 import nl.checkin.util.Utils;
 
 
 
-public class AuthenticationControl {
+public class AuthenticationControl extends Control {
 
-	private ResultSet resultSet;
-	private Connection connection;
-	private PreparedStatement statement;
 
 	public AuthenticationControl() throws SQLException, NamingException {
 	}
