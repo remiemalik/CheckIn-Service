@@ -66,7 +66,7 @@ public class Service {
 			@QueryParam(Attribute.CHECK_DATETIME) long checkDateTime,
 			@QueryParam(Attribute.DAY_NAME) int dayName,
 			@QueryParam(Attribute.WEEK) int week,
-			@QueryParam(Attribute.WEEK) int year) throws SQLException,
+			@QueryParam(Attribute.YEAR) int year) throws SQLException,
 			NamingException, ParseException {
 
 		if (Utils.isNotNull(inputToken, user_id, checkDateTime, dayName, week,
@@ -77,7 +77,8 @@ public class Service {
 			registration.setDayName(dayName);
 			registration.setWeek(week);
 			registration.setYear(year);
-			return regControl.register(inputToken, registration);
+			regControl.register(inputToken, registration);
+			return regControl.getResponse();
 		} else {
 			return new ErrorResponse("302", "missing parameter");
 		}

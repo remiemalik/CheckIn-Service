@@ -2,21 +2,20 @@ package nl.checkin.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-
-
 @XmlRootElement
 public class ErrorResponse extends Response {
-	
-	 String message;
+
+	String message;
+
 	public ErrorResponse() {
 
 	}
-	
-	public ErrorResponse(String code, String message){
+
+	public ErrorResponse(String code, String message) {
 		this.code = code;
 		this.message = message;
 	}
-	
+
 	public String getMessage() {
 		return message;
 	}
@@ -25,5 +24,4 @@ public class ErrorResponse extends Response {
 		this.message = message;
 	}
 
-	
 }

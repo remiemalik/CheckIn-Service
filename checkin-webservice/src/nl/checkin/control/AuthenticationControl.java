@@ -1,8 +1,5 @@
 package nl.checkin.control;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
@@ -11,17 +8,16 @@ import nl.checkin.control.connection.DataSourceSingleton;
 import nl.checkin.model.Token;
 import nl.checkin.util.Utils;
 
-
-
 public class AuthenticationControl extends Control {
 
-
-	public AuthenticationControl() throws SQLException, NamingException {
+	public AuthenticationControl() {
 	}
-	
-	public Token hasValidCredentials(String username, String password) throws SQLException, NamingException{
+
+	public Token hasValidCredentials(String username, String password)
+			throws SQLException, NamingException {
 		try {
-			connection = DataSourceSingleton.getInstance().getDatasource().getConnection();
+			connection = DataSourceSingleton.getInstance().getDatasource()
+					.getConnection();
 			String query = "select count(*) as count, token from user where username=? AND password=(?)";
 			statement = connection.prepareStatement(query);
 			statement.setString(1, username);
@@ -33,10 +29,12 @@ public class AuthenticationControl extends Control {
 		}
 
 	}
-	
-	public Token hasValidToken(String token) throws SQLException, NamingException{
+
+	public Token hasValidToken(String token) throws SQLException,
+			NamingException {
 		try {
-		    connection = DataSourceSingleton.getInstance().getDatasource().getConnection();
+			connection = DataSourceSingleton.getInstance().getDatasource()
+					.getConnection();
 			String query = "select count(*) as count from user where token=?";
 			statement = connection.prepareStatement(query);
 			statement.setString(1, token);
@@ -45,6 +43,6 @@ public class AuthenticationControl extends Control {
 		} finally {
 			Utils.closeEverything(resultSet, statement, connection);
 		}
-		
+
 	}
 }

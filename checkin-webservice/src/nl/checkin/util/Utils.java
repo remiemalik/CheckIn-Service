@@ -25,8 +25,8 @@ public class Utils {
 
 	}
 
-	public static Token recordExists(ResultSet result, boolean returnToken)
-			throws SQLException {
+	public static synchronized Token recordExists(ResultSet result,
+			boolean returnToken) throws SQLException {
 		Token token = null;
 		int count;
 		boolean recordExist = false;
@@ -58,8 +58,7 @@ public class Utils {
 	public static int getDifferenceInMinutes(long startTime, long endTime) {
 
 		long timeDifInMilliSec = 0;
-		System.out.println(startTime);
-		System.out.println(endTime);
+
 		if (startTime >= endTime) {
 			timeDifInMilliSec = startTime - endTime;
 		} else {
@@ -67,7 +66,6 @@ public class Utils {
 		}
 
 		long timeDifMinutes = (timeDifInMilliSec * 1000L) / (60 * 1000);
-		System.out.println(" result: " + timeDifMinutes);
 		return (int) timeDifMinutes;
 	}
 
