@@ -12,9 +12,9 @@ import javax.ws.rs.core.MediaType;
 
 import nl.checkin.control.AuthenticationControl;
 import nl.checkin.control.RegistrationControl;
-import nl.checkin.model.ErrorResponse;
+import nl.checkin.control.dao.InMemoryResponseDao;
+import nl.checkin.control.dao.Response;
 import nl.checkin.model.Registration;
-import nl.checkin.model.Token;
 import nl.checkin.util.Attribute;
 import nl.checkin.util.Utils;
 
@@ -24,44 +24,54 @@ public class Service {
 
 	private AuthenticationControl authControl;
 	private RegistrationControl regControl;
-	private Token token;
+	private InMemoryResponseDao responseDao;
 
 	public Service() throws SQLException, NamingException {
 		authControl = new AuthenticationControl();
 		regControl = new RegistrationControl();
+		responseDao = InMemoryResponseDao.getInstance();
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path(Attribute.LOGIN_URL)
-	public Token loginUser(@QueryParam(Attribute.USERNAME) String username,
+	public Response loginUser(@QueryParam(Attribute.USERNAME) String username,
 			@QueryParam(Attribute.PASSWORD) String password)
 			throws SQLException, NamingException {
 
-		token = null;
 		if (Utils.isNotNull(username, password)) {
-			token = authControl.hasValidCredentials(username, password);
+			if (authControl.hasValidCredentials(username, password)) {
+				return authControl.getResponse();
+			} else {
+				return responseDao.findResponseByCode(Attribute.WRONG_CREDENTIALS);
+			}
+		} else {
+			return responseDao.findResponseByCode(Attribute.MISSING_PARAMETER);
 		}
-		return token;
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path(Attribute.VALID_TOKEN_URL)
-	public Token tokenExists(@QueryParam(Attribute.TOKEN) String inputToken)
+	public Response tokenExists(@QueryParam(Attribute.TOKEN) String inputToken)
 			throws SQLException, NamingException {
-		token = null;
-		if (Utils.isNotNull(inputToken)) {
-			token = authControl.hasValidToken(inputToken);
-		}
 
-		return token;
+		if (Utils.isNotNull(inputToken)) {
+			if (authControl.hasValidToken(inputToken)) {
+				return authControl.getResponse();
+			} else {
+				return responseDao.findResponseByCode(Attribute.INVALID_TOKEN);
+			}
+		} else {
+			return responseDao.findResponseByCode(Attribute.MISSING_PARAMETER);
+		}
 	}
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path(Attribute.REGISTER_URL)
-	public Object registerEntry(@QueryParam(Attribute.TOKEN) String inputToken,
+	public Response registerEntry(
+			@QueryParam(Attribute.TOKEN) String inputToken,
 			@QueryParam(Attribute.USER_ID) int user_id,
 			@QueryParam(Attribute.CHECK_DATETIME) long checkDateTime,
 			@QueryParam(Attribute.DAY_NAME) int dayName,
@@ -80,7 +90,7 @@ public class Service {
 			regControl.register(inputToken, registration);
 			return regControl.getResponse();
 		} else {
-			return new ErrorResponse("302", "missing parameter");
+			return responseDao.findResponseByCode(Attribute.MISSING_PARAMETER);
 		}
 
 	}

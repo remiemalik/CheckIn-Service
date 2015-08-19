@@ -4,37 +4,29 @@ import java.sql.SQLException;
 
 import javax.naming.NamingException;
 
-import nl.checkin.control.connection.DataSourceSingleton;
-import nl.checkin.model.ErrorResponse;
+import nl.checkin.control.dao.InMemoryResponseDao;
+import nl.checkin.control.dao.Response;
+import nl.checkin.control.singleton.DataSource;
 import nl.checkin.model.Registration;
-import nl.checkin.model.Response;
-import nl.checkin.model.SuccesResponse;
-import nl.checkin.model.Token;
+import nl.checkin.util.Attribute;
 import nl.checkin.util.Utils;
 
 public class RegistrationControl extends Control {
 
 	private AuthenticationControl authControl;
-	private Token authToken;
 	private Response response;
+	private InMemoryResponseDao responseDao;
 
 	public RegistrationControl() {
 		authControl = new AuthenticationControl();
+		responseDao = InMemoryResponseDao.getInstance();
 	}
 
 	public void register(String inputToken, Registration registration) {
 
 		try {
-			authToken = authControl.hasValidToken(inputToken);
-		} catch (SQLException | NamingException e) {
-			response = new ErrorResponse("303",
-					"some sql or parsing went wrong");
-		}
-
-		if (authToken.isValid()) {
-
-			try {
-				connection = DataSourceSingleton.getInstance().getDatasource()
+			if (authControl.hasValidToken(inputToken)) {
+				connection = DataSource.getInstance().getDatasource()
 						.getConnection();
 				String query = "select count(*) as count from registration where fk_user_id = ? and DATE_FORMAT(FROM_UNIXTIME(checkInDate),"
 						+ " '%Y-%m-%d') = DATE(NOW())"
@@ -43,34 +35,29 @@ public class RegistrationControl extends Control {
 				statement.setInt(1, registration.getFk_user_id());
 				resultSet = statement.executeQuery();
 
-				Token registerToken = Utils.recordExists(resultSet, false);
-
-				if (registerToken.isValid()) {
+				if (Utils.recordExists(resultSet)) {
 					System.out.println(" check out");
 					checkOut(registration);
 				} else {
 					System.out.println(" check in");
 					checkIn(registration);
 				}
-
-			} catch (SQLException | NamingException ex) {
-				response = new ErrorResponse("303",
-						"some sql or parsing went wrong");
+			} else {
+				response = responseDao.findResponseByCode(Attribute.INVALID_TOKEN);
 			}
+		} catch (SQLException | NamingException ex) {
+			response = responseDao.findResponseByCode(Attribute.FAILED_SQL);
+		}
 
-			finally {
-				Utils.closeEverything(resultSet, statement, connection);
-			}
-		} else {
-			response = new ErrorResponse("300", "bad content");
+		finally {
+			Utils.closeEverything(resultSet, statement, connection);
 		}
 	}
 
 	public void checkIn(Registration registration) {
 
 		try {
-			connection = DataSourceSingleton.getInstance().getDatasource()
-					.getConnection();
+			connection = DataSource.getInstance().getConnection();
 			String query = "insert into registration (fk_user_id, checkInDate, dayname, week, year) values (?, ?, ?, ?, ?)";
 			statement = connection.prepareStatement(query);
 			statement.setInt(1, registration.getFk_user_id());
@@ -80,13 +67,12 @@ public class RegistrationControl extends Control {
 			statement.setInt(5, registration.getYear());
 
 			if (statement.executeUpdate() > 0) {
-				response = new SuccesResponse();
+				response = responseDao.findResponseByCode(Attribute.SUCCESS);
 			} else {
-				response = new ErrorResponse("204", "Could not perform action");
-
+				response = responseDao.findResponseByCode(Attribute.ACTION_FAILED);
 			}
 		} catch (SQLException | NamingException ex) {
-			response = new ErrorResponse("303", "some sql went wrong");
+			response = responseDao.findResponseByCode(Attribute.ACTION_FAILED);
 		}
 
 		finally {
@@ -97,8 +83,7 @@ public class RegistrationControl extends Control {
 	public void checkOut(Registration registration) {
 
 		try {
-			connection = DataSourceSingleton.getInstance().getDatasource()
-					.getConnection();
+			connection = DataSource.getInstance().getConnection();
 			String query = "select id, checkInDate from registration where fk_user_id = ? and DATE_FORMAT(FROM_UNIXTIME(checkInDate), '%Y-%m-%d') = DATE(NOW())";
 			statement = connection.prepareStatement(query);
 
@@ -123,15 +108,13 @@ public class RegistrationControl extends Control {
 			statement.setInt(3, registration.getId());
 
 			if (statement.executeUpdate() > 0) {
-
-				response = new SuccesResponse();
+				response = responseDao.findResponseByCode("200");
 			} else {
-				response = new ErrorResponse("204", "Could not perform action");
+				response = responseDao.findResponseByCode(Attribute.ACTION_FAILED);
 			}
 
 		} catch (SQLException | NamingException e) {
-			response = new ErrorResponse("303",
-					"some sql or parsing went wrong");
+			response = responseDao.findResponseByCode(Attribute.FAILED_SQL);
 		}
 
 		finally {

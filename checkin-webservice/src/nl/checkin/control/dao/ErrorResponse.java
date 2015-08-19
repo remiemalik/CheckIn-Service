@@ -1,4 +1,4 @@
-package nl.checkin.model;
+package nl.checkin.control.dao;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -22,6 +22,11 @@ public class ErrorResponse extends Response {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String toString() {
+		return "ErrorResponse{code=".concat(code + ",").concat(
+				"message=".concat(message).concat("}"));
 	}
 
 }

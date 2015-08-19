@@ -1,4 +1,4 @@
-package nl.checkin.model;
+package nl.checkin.control.dao;
 
 public abstract class Response {
 
@@ -11,5 +11,7 @@ public abstract class Response {
 	public void setCode(String code) {
 		this.code = code;
 	}
+
+	
 
 }

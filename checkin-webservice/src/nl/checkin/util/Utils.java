@@ -5,9 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import nl.checkin.model.ErrorResponse;
-import nl.checkin.model.Token;
-
 public class Utils {
 
 	public static boolean isNotNull(Object... parameters) {
@@ -25,34 +22,15 @@ public class Utils {
 
 	}
 
-	public static synchronized Token recordExists(ResultSet result,
-			boolean returnToken) throws SQLException {
-		Token token = null;
-		int count;
-		boolean recordExist = false;
+	public static synchronized boolean recordExists(ResultSet result)
+			throws SQLException {
+		int count = 0;
 
 		while (result.next()) {
-
 			count = result.getInt("count");
-			switch (count) {
-			case 0:
-				recordExist = false;
-				break;
-
-			case 1:
-				recordExist = true;
-				break;
-			}
-
-			if (returnToken) {
-				token = new Token(result.getString("token"), recordExist);
-			} else {
-				token = new Token(null, recordExist);
-			}
-
 		}
 
-		return token;
+		return count > 1 ? true : false;
 	}
 
 	public static int getDifferenceInMinutes(long startTime, long endTime) {
@@ -67,16 +45,6 @@ public class Utils {
 
 		long timeDifMinutes = (timeDifInMilliSec * 1000L) / (60 * 1000);
 		return (int) timeDifMinutes;
-	}
-
-	public static ErrorResponse getResponse(int number) {
-		ErrorResponse response;
-		if (number == 0) {
-			response = new ErrorResponse("204", "Could not perform action");
-		} else {
-			response = new ErrorResponse("200", "Succes");
-		}
-		return response;
 	}
 
 	public static void closeEverything(ResultSet rs, Statement stmt,
